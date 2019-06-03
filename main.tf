@@ -6,11 +6,6 @@ terraform {
   }
 
   required_version = ">= 0.12.0"
-
-  required_providers {
-    aws     = ">= 2.7.0"
-    archive = ">= 1.2"
-  }
 }
 
 provider archive {
@@ -19,7 +14,7 @@ provider archive {
 
 provider aws {
   region  = "us-east-1"
-  version = "~> 2.7"
+  version = "~> 2.11"
 }
 
 locals {
@@ -47,7 +42,7 @@ data aws_route53_zone website {
 
 module secrets {
   source                   = "amancevice/slackbot-secrets/aws"
-  version                  = "2.0.0"
+  version                  = "2.0.1"
   kms_key_alias            = "alias/brutalismbot"
   kms_key_tags             = local.tags
   secret_name              = "brutalismbot"
