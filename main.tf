@@ -59,7 +59,7 @@ module secrets {
 
 module slackbot {
   source               = "amancevice/slackbot/aws"
-  version              = "14.0.0"
+  version              = "14.0.1"
   api_description      = "Brutalismbot REST API"
   api_name             = "brutalismbot"
   api_stage_name       = "v1"
