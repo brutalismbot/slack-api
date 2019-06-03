@@ -40,14 +40,6 @@ apply: $(buildfile)
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_DEFAULT_REGION \
 	--env AWS_SECRET_ACCESS_KEY \
-	--build-arg TF_VAR_slack_client_id \
-	--build-arg TF_VAR_slack_client_secret \
-	--build-arg TF_VAR_slack_oauth_error_uri \
-	--build-arg TF_VAR_slack_oauth_redirect_uri \
-	--build-arg TF_VAR_slack_oauth_success_uri \
-	--build-arg TF_VAR_slack_signing_secret \
-	--build-arg TF_VAR_slack_signing_version \
-	--build-arg TF_VAR_slack_token \
 	$(digest) \
 	terraform apply $(planfile)
 
