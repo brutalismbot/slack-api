@@ -23,8 +23,8 @@ provider aws {
 
 locals {
   tags = {
-    App     = "brutalismbot"
-    Name    = "brutalismbot.com"
+    App     = "api"
+    Name    = "brutalismbot"
     Release = var.release
     Repo    = var.repo
   }
