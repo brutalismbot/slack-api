@@ -15,7 +15,7 @@ ARG TF_VAR_slack_signing_secret
 ARG TF_VAR_slack_signing_version
 ARG TF_VAR_slack_token
 
-COPY --from=hashicorp/terraform:0.12.0 /bin/terraform /bin/
+COPY --from=hashicorp/terraform:0.12.1 /bin/terraform /bin/
 COPY . .
 
 RUN terraform init
