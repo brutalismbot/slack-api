@@ -1,6 +1,7 @@
 name    := api
 runtime := nodejs10.x
 build   := $(shell git describe --tags --always)
+digest   = $(shell cat .docker/$(build))
 
 .PHONY: all apply clean shell
 
@@ -32,11 +33,11 @@ apply: .docker/$(build)
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_DEFAULT_REGION \
 	--env AWS_SECRET_ACCESS_KEY \
-	$(shell cat $<)
+	$(digest)
 
 clean:
 	-docker image rm -f $(shell sed G .docker/*)
 	-rm -rf .docker
 
 shell: .docker/$(build) .env
-	docker run --rm -it --env-file .env $(shell cat $<) /bin/bash
+	docker run --rm -it --env-file .env $(digest) /bin/bash

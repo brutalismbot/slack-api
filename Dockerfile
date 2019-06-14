@@ -1,7 +1,6 @@
 ARG RUNTIME=nodejs10.x
 
 FROM lambci/lambda:build-${RUNTIME}
-
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_DEFAULT_REGION=us-east-1
 ARG AWS_SECRET_ACCESS_KEY
@@ -15,10 +14,8 @@ ARG TF_VAR_slack_oauth_success_uri
 ARG TF_VAR_slack_signing_secret
 ARG TF_VAR_slack_signing_version
 ARG TF_VAR_slack_token
-
-COPY --from=hashicorp/terraform:0.12.1 /bin/terraform /bin/
+COPY --from=hashicorp/terraform:0.12.2 /bin/terraform /bin/
 COPY . .
-
 RUN terraform init
 RUN terraform plan -out terraform.zip
 CMD ["terraform", "apply", "terraform.zip"]
