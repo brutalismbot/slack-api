@@ -8,10 +8,6 @@ terraform {
   required_version = ">= 0.12.0"
 }
 
-provider archive {
-  version = "~> 1.2"
-}
-
 provider aws {
   region  = "us-east-1"
   version = "~> 2.11"
@@ -44,9 +40,7 @@ module secrets {
   source                   = "amancevice/slackbot-secrets/aws"
   version                  = "2.0.2"
   kms_key_alias            = "alias/brutalismbot"
-  kms_key_tags             = local.tags
   secret_name              = "brutalismbot"
-  secret_tags              = local.tags
   slack_client_id          = var.slack_client_id
   slack_client_secret      = var.slack_client_secret
   slack_oauth_error_uri    = var.slack_oauth_error_uri
@@ -55,24 +49,23 @@ module secrets {
   slack_signing_secret     = var.slack_signing_secret
   slack_signing_version    = var.slack_signing_version
   slack_token              = var.slack_token
+  kms_key_tags             = local.tags
+  secret_tags              = local.tags
 }
 
 module slackbot {
-  source               = "amancevice/slackbot/aws"
-  version              = "14.1.0"
-  api_description      = "Brutalismbot REST API"
-  api_name             = "brutalismbot"
-  api_stage_name       = "v1"
-  api_stage_tags       = local.tags
-  base_url             = "/slack"
-  kms_key_id           = data.aws_kms_key.key.key_id
-  lambda_function_name = "brutalismbot-api"
-  lambda_tags          = local.tags
-  log_group_tags       = local.tags
-  role_name            = "brutalismbot"
-  role_tags            = local.tags
-  secret_name          = "brutalismbot"
-  sns_topic_prefix     = "brutalismbot_"
+  source          = "amancevice/slackbot/aws"
+  version         = "15.0.0"
+  api_description = "Brutalismbot REST API"
+  app_name        = "brutalismbot"
+  base_url        = "/slack"
+  secret_name     = "brutalismbot"
+  topic_name      = "brutalismbot-api"
+  kms_key_id      = data.aws_kms_key.key.key_id
+  api_stage_tags  = local.tags
+  lambda_tags     = local.tags
+  log_group_tags  = local.tags
+  role_tags       = local.tags
 }
 
 resource aws_api_gateway_base_path_mapping api {

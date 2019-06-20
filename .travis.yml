@@ -2,11 +2,11 @@ language: ruby
 rvm:
 - 2.5.5
 script:
-- make
+- make plan
 deploy:
 - provider: script
   script: make apply
   skip_cleanup: true
   on:
-    repo: brutalismbot/brutalismbot.com
+    repo: brutalismbot/api
     tags: true
