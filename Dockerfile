@@ -4,7 +4,7 @@ FROM lambci/lambda:build-${RUNTIME} AS build
 COPY . .
 
 FROM lambci/lambda:build-${RUNTIME} AS test
-COPY --from=hashicorp/terraform:0.12.2 /bin/terraform /bin/
+COPY --from=hashicorp/terraform:0.12.3 /bin/terraform /bin/
 COPY --from=build /var/task/ .
 RUN terraform fmt -check
 
