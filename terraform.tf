@@ -38,7 +38,7 @@ data aws_route53_zone website {
 
 module secrets {
   source                   = "amancevice/slackbot-secrets/aws"
-  version                  = "2.0.2"
+  version                  = "~> 2.0"
   kms_key_alias            = "alias/brutalismbot"
   secret_name              = "brutalismbot"
   slack_client_id          = var.slack_client_id
@@ -55,7 +55,7 @@ module secrets {
 
 module slackbot {
   source          = "amancevice/slackbot/aws"
-  version         = "15.0.0"
+  version         = "~> 15.0"
   api_description = "Brutalismbot REST API"
   app_name        = "brutalismbot"
   base_url        = "/slack"
