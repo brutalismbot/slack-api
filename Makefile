@@ -41,6 +41,6 @@ plan: .docker/$(build)
 
 shell: .docker/$(build) .env
 	docker run --rm -it \
+	--entrypoint /bin/sh \
 	--env-file .env \
-	$(shell cat $<) \
-	/bin/sh
+	$(shell cat $<)
