@@ -1,5 +1,5 @@
 ARG TERRAFORM=latest
-FROM hashicorp/terraform:${TERRAFORM}
+FROM hashicorp/terraform:${TERRAFORM} AS plan
 WORKDIR /var/task/
 COPY . .
 ARG AWS_ACCESS_KEY_ID

@@ -5,7 +5,7 @@ terraform {
     region = "us-east-1"
   }
 
-  required_version = ">= 0.12.0"
+  required_version = "~> 0.12"
 }
 
 provider aws {
@@ -14,16 +14,28 @@ provider aws {
 }
 
 locals {
+  domain                   = "brutalismbot.com"
+  repo                     = "https://github.com/brutalismbot/api"
+  release                  = var.release
+  slack_client_id          = var.slack_client_id
+  slack_client_secret      = var.slack_client_secret
+  slack_oauth_error_uri    = var.slack_oauth_error_uri
+  slack_oauth_redirect_uri = var.slack_oauth_redirect_uri
+  slack_oauth_success_uri  = var.slack_oauth_success_uri
+  slack_signing_secret     = var.slack_signing_secret
+  slack_signing_version    = var.slack_signing_version
+  slack_token              = var.slack_token
+
   tags = {
     App     = "api"
     Name    = "brutalismbot"
-    Release = var.release
-    Repo    = var.repo
+    Release = local.release
+    Repo    = local.repo
   }
 }
 
 data aws_acm_certificate cert {
-  domain      = "brutalismbot.com"
+  domain      = local.domain
   types       = ["AMAZON_ISSUED"]
   most_recent = true
 }
@@ -33,7 +45,7 @@ data aws_kms_key key {
 }
 
 data aws_route53_zone website {
-  name = "brutalismbot.com."
+  name = "${local.domain}."
 }
 
 module secrets {
@@ -41,14 +53,14 @@ module secrets {
   version                  = "~> 2.0"
   kms_key_alias            = "alias/brutalismbot"
   secret_name              = "brutalismbot"
-  slack_client_id          = var.slack_client_id
-  slack_client_secret      = var.slack_client_secret
-  slack_oauth_error_uri    = var.slack_oauth_error_uri
-  slack_oauth_redirect_uri = var.slack_oauth_redirect_uri
-  slack_oauth_success_uri  = var.slack_oauth_success_uri
-  slack_signing_secret     = var.slack_signing_secret
-  slack_signing_version    = var.slack_signing_version
-  slack_token              = var.slack_token
+  slack_client_id          = local.slack_client_id
+  slack_client_secret      = local.slack_client_secret
+  slack_oauth_error_uri    = local.slack_oauth_error_uri
+  slack_oauth_redirect_uri = local.slack_oauth_redirect_uri
+  slack_oauth_success_uri  = local.slack_oauth_success_uri
+  slack_signing_secret     = local.slack_signing_secret
+  slack_signing_version    = local.slack_signing_version
+  slack_token              = local.slack_token
   kms_key_tags             = local.tags
   secret_tags              = local.tags
 }
@@ -77,7 +89,7 @@ resource aws_api_gateway_base_path_mapping api {
 
 resource aws_api_gateway_domain_name api {
   certificate_arn = data.aws_acm_certificate.cert.arn
-  domain_name     = "api.brutalismbot.com"
+  domain_name     = "api.${local.domain}"
 }
 
 resource aws_route53_record api {
@@ -94,11 +106,6 @@ resource aws_route53_record api {
 
 variable release {
   description = "Release tag."
-}
-
-variable repo {
-  description = "Project repository."
-  default     = "https://github.com/brutalismbot/api"
 }
 
 variable slack_client_id {

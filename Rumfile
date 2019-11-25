@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+require "dotenv/load"
+
+rum :"brutalismbot/api" do
+  tag %x(git describe --tags --always).strip
+
+  env :AWS_ACCESS_KEY_ID
+  env :AWS_SECRET_ACCESS_KEY
+  env :AWS_DEFAULT_REGION
+  env :TF_VAR_release => tag
+  env :TF_VAR_slack_client_id
+  env :TF_VAR_slack_client_secret
+  env :TF_VAR_slack_oauth_error_uri
+  env :TF_VAR_slack_oauth_redirect_uri
+  env :TF_VAR_slack_oauth_success_uri
+  env :TF_VAR_slack_signing_secret
+  env :TF_VAR_slack_signing_version
+  env :TF_VAR_slack_token
+
+  stage :plan
+
+  desc "Apply infrastructure"
+  run :apply => :plan
+
+  default :plan
+end
