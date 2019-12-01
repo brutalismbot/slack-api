@@ -14,8 +14,10 @@ provider aws {
 }
 
 locals {
+  app                      = "brutalismbot"
   domain                   = "brutalismbot.com"
   repo                     = "https://github.com/brutalismbot/api"
+  role_name                = local.app
   release                  = var.release
   slack_client_id          = var.slack_client_id
   slack_client_secret      = var.slack_client_secret
@@ -52,7 +54,7 @@ module secrets {
   source                   = "amancevice/slackbot-secrets/aws"
   version                  = "~> 2.0"
   kms_key_alias            = "alias/brutalismbot"
-  secret_name              = "brutalismbot"
+  secret_name              = "brutalismbot-slack"
   slack_client_id          = local.slack_client_id
   slack_client_secret      = local.slack_client_secret
   slack_oauth_error_uri    = local.slack_oauth_error_uri
@@ -69,27 +71,28 @@ module slackbot {
   source          = "amancevice/slackbot/aws"
   version         = "~> 15.0"
   api_description = "Brutalismbot REST API"
-  app_name        = "brutalismbot"
-  base_url        = "/slack"
-  secret_name     = "brutalismbot"
-  topic_name      = "brutalismbot-api"
-  kms_key_id      = data.aws_kms_key.key.key_id
   api_stage_tags  = local.tags
+  app_name        = "brutalismbot-slack"
+  base_url        = "/slack"
+  kms_key_id      = data.aws_kms_key.key.key_id
   lambda_tags     = local.tags
   log_group_tags  = local.tags
+  role_name       = local.role_name
   role_tags       = local.tags
+  secret_name     = module.secrets.secret_name
 }
 
 resource aws_api_gateway_base_path_mapping api {
   api_id      = module.slackbot.api_id
+  base_path   = "slack"
   domain_name = aws_api_gateway_domain_name.api.domain_name
   stage_name  = module.slackbot.api_stage_name
-  base_path   = "slack"
 }
 
 resource aws_api_gateway_domain_name api {
   certificate_arn = data.aws_acm_certificate.cert.arn
   domain_name     = "api.${local.domain}"
+  security_policy = "TLS_1_2"
 }
 
 resource aws_route53_record api {
