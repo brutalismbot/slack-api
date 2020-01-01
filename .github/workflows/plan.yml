@@ -1,4 +1,4 @@
-name: Plan
+name: plan
 on:
   push:
     branches:
