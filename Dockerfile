@@ -5,7 +5,6 @@ COPY . .
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_DEFAULT_REGION=us-east-1
 ARG AWS_SECRET_ACCESS_KEY
-ARG AWS_SECRET_ACCESS_KEY
 RUN terraform fmt -check
 RUN terraform init
 ARG TF_VAR_release
