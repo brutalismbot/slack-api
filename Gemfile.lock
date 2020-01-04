@@ -11,7 +11,7 @@ PLATFORMS
 
 DEPENDENCIES
   dotenv (~> 2.7)
-  rumrunner (~> 0.4)
+  rumrunner (~> 0.5)
 
 BUNDLED WITH
    2.1.2
