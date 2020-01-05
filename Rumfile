@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 require "dotenv/load"
 
-rum :"brutalismbot/api" do
+rum :"brutalismbot/slack-api" do
   tag %x(git describe --tags --always).strip
 
   env :AWS_ACCESS_KEY_ID
