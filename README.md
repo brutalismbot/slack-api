@@ -1,6 +1,6 @@
 <img alt="brutalismbot" src="https://brutalismbot.com/banner.png"/>
 
-![plan](https://github.com/brutalismbot/slack-api/workflows/plan/badge.svg)
+[![plan](https://github.com/brutalismbot/slack-api/workflows/plan/badge.svg)](https://github.com/brutalismbot/slack-api/actions)
 
 Brutalismbot REST API for interfacing with Slack.
 
