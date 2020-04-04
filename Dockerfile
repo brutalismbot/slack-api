@@ -7,14 +7,14 @@ ARG AWS_DEFAULT_REGION=us-east-1
 ARG AWS_SECRET_ACCESS_KEY
 RUN terraform fmt -check
 RUN terraform init
-ARG TF_VAR_release
-ARG TF_VAR_slack_client_id
-ARG TF_VAR_slack_client_secret
-ARG TF_VAR_slack_oauth_error_uri
-ARG TF_VAR_slack_oauth_redirect_uri
-ARG TF_VAR_slack_oauth_success_uri
-ARG TF_VAR_slack_signing_secret
-ARG TF_VAR_slack_signing_version
-ARG TF_VAR_slack_token
+ARG TF_VAR_RELEASE
+ARG TF_VAR_SLACK_CLIENT_ID
+ARG TF_VAR_SLACK_CLIENT_SECRET
+ARG TF_VAR_SLACK_OAUTH_ERROR_URI
+ARG TF_VAR_SLACK_OAUTH_REDIRECT_URI
+ARG TF_VAR_SLACK_OAUTH_SUCCESS_URI
+ARG TF_VAR_SLACK_SIGNING_SECRET
+ARG TF_VAR_SLACK_SIGNING_VERSION
+ARG TF_VAR_SLACK_TOKEN
 RUN terraform plan -out terraform.zip
 CMD ["apply", "terraform.zip"]

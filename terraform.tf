@@ -18,15 +18,15 @@ locals {
   domain                   = "brutalismbot.com"
   repo                     = "https://github.com/brutalismbot/api"
   role_name                = local.app
-  release                  = var.release
-  slack_client_id          = var.slack_client_id
-  slack_client_secret      = var.slack_client_secret
-  slack_oauth_error_uri    = var.slack_oauth_error_uri
-  slack_oauth_redirect_uri = var.slack_oauth_redirect_uri
-  slack_oauth_success_uri  = var.slack_oauth_success_uri
-  slack_signing_secret     = var.slack_signing_secret
-  slack_signing_version    = var.slack_signing_version
-  slack_token              = var.slack_token
+  release                  = var.RELEASE
+  slack_client_id          = var.SLACK_CLIENT_ID
+  slack_client_secret      = var.SLACK_CLIENT_SECRET
+  slack_oauth_error_uri    = var.SLACK_OAUTH_ERROR_URI
+  slack_oauth_redirect_uri = var.SLACK_OAUTH_REDIRECT_URI
+  slack_oauth_success_uri  = var.SLACK_OAUTH_SUCCESS_URI
+  slack_signing_secret     = var.SLACK_SIGNING_SECRET
+  slack_signing_version    = var.SLACK_SIGNING_VERSION
+  slack_token              = var.SLACK_TOKEN
 
   tags = {
     App     = "api"
@@ -107,42 +107,42 @@ resource aws_route53_record api {
   }
 }
 
-variable release {
+variable RELEASE {
   description = "Release tag."
 }
 
-variable slack_client_id {
+variable SLACK_CLIENT_ID {
   description = "Slack Client ID."
 }
 
-variable slack_client_secret {
+variable SLACK_CLIENT_SECRET {
   description = "Slack Client Secret."
 }
 
-variable slack_oauth_error_uri {
+variable SLACK_OAUTH_ERROR_URI {
   description = "Slack OAuth error URI."
   default     = "slack://open"
 }
 
-variable slack_oauth_redirect_uri {
+variable SLACK_OAUTH_REDIRECT_URI {
   description = "Slack OAuth redirect URI."
   default     = ""
 }
 
-variable slack_oauth_success_uri {
+variable SLACK_OAUTH_SUCCESS_URI {
   description = "Slack OAuth success URI."
   default     = ""
 }
 
-variable slack_signing_secret {
+variable SLACK_SIGNING_SECRET {
   description = "Slack signing secret."
 }
 
-variable slack_signing_version {
+variable SLACK_SIGNING_VERSION {
   description = "Slack signing version."
   default     = "v0"
 }
 
-variable slack_token {
+variable SLACK_TOKEN {
   description = "Slack bot OAuth token."
 }
