@@ -52,7 +52,7 @@ data aws_route53_zone website {
 
 module secrets {
   source                   = "amancevice/slackbot-secrets/aws"
-  version                  = "~> 2.0"
+  version                  = "~> 3.0"
   kms_key_alias            = "alias/brutalismbot"
   secret_name              = "brutalismbot-slack"
   slack_client_id          = local.slack_client_id
@@ -69,24 +69,24 @@ module secrets {
 
 module slackbot {
   source          = "amancevice/slackbot/aws"
-  version         = "~> 16.0"
+  version         = "~> 18.0"
   api_description = "Brutalismbot REST API"
   api_stage_tags  = local.tags
   app_name        = "brutalismbot-slack"
   base_url        = "/slack"
-  kms_key_id      = data.aws_kms_key.key.key_id
+  kms_key_arn     = data.aws_kms_key.key.arn
   lambda_tags     = local.tags
   log_group_tags  = local.tags
   role_name       = local.role_name
   role_tags       = local.tags
-  secret_name     = module.secrets.secret_name
+  secret_name     = module.secrets.secret.name
 }
 
 resource aws_api_gateway_base_path_mapping api {
-  api_id      = module.slackbot.api_id
+  api_id      = module.slackbot.api.id
   base_path   = "slack"
   domain_name = aws_api_gateway_domain_name.api.domain_name
-  stage_name  = module.slackbot.api_stage_name
+  stage_name  = module.slackbot.api_deployment.stage_name
 }
 
 resource aws_api_gateway_domain_name api {
@@ -108,41 +108,41 @@ resource aws_route53_record api {
 }
 
 variable RELEASE {
-  description = "Release tag."
+  description = "Release tag"
 }
 
 variable SLACK_CLIENT_ID {
-  description = "Slack Client ID."
+  description = "Slack Client ID"
 }
 
 variable SLACK_CLIENT_SECRET {
-  description = "Slack Client Secret."
+  description = "Slack Client Secret"
 }
 
 variable SLACK_OAUTH_ERROR_URI {
-  description = "Slack OAuth error URI."
+  description = "Slack OAuth error URI"
   default     = "slack://open"
 }
 
 variable SLACK_OAUTH_REDIRECT_URI {
-  description = "Slack OAuth redirect URI."
-  default     = ""
+  description = "Slack OAuth redirect URI"
+  default     = null
 }
 
 variable SLACK_OAUTH_SUCCESS_URI {
-  description = "Slack OAuth success URI."
-  default     = ""
+  description = "Slack OAuth success URI"
+  default     = null
 }
 
 variable SLACK_SIGNING_SECRET {
-  description = "Slack signing secret."
+  description = "Slack signing secret"
 }
 
 variable SLACK_SIGNING_VERSION {
-  description = "Slack signing version."
+  description = "Slack signing version"
   default     = "v0"
 }
 
 variable SLACK_TOKEN {
-  description = "Slack bot OAuth token."
+  description = "Slack bot OAuth token"
 }
