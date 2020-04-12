@@ -4,8 +4,6 @@ terraform {
     key    = "terraform/api.tfstate"
     region = "us-east-1"
   }
-
-  required_version = "~> 0.12"
 }
 
 provider aws {
@@ -14,11 +12,6 @@ provider aws {
 }
 
 locals {
-  app                      = "brutalismbot"
-  domain                   = "brutalismbot.com"
-  repo                     = "https://github.com/brutalismbot/api"
-  role_name                = local.app
-  release                  = var.RELEASE
   slack_client_id          = var.SLACK_CLIENT_ID
   slack_client_secret      = var.SLACK_CLIENT_SECRET
   slack_oauth_error_uri    = var.SLACK_OAUTH_ERROR_URI
@@ -29,32 +22,29 @@ locals {
   slack_token              = var.SLACK_TOKEN
 
   tags = {
-    App     = "api"
-    Name    = "brutalismbot"
-    Release = local.release
-    Repo    = local.repo
+    App  = "slack-api"
+    Name = "brutalismbot"
+    Repo = "https://github.com/brutalismbot/slack-api"
   }
 }
 
 data aws_acm_certificate cert {
-  domain      = local.domain
+  domain      = "brutalismbot.com"
   types       = ["AMAZON_ISSUED"]
   most_recent = true
 }
 
-data aws_kms_key key {
-  key_id = "alias/brutalismbot"
-}
-
 data aws_route53_zone website {
-  name = "${local.domain}."
+  name = "brutalismbot.com."
 }
 
 module secrets {
-  source                   = "amancevice/slackbot-secrets/aws"
-  version                  = "~> 3.0"
-  kms_key_alias            = "alias/brutalismbot"
-  secret_name              = "brutalismbot-slack"
+  source  = "amancevice/slackbot-secrets/aws"
+  version = "~> 3.0"
+
+  kms_key_alias = "alias/brutalismbot"
+  secret_name   = "brutalismbot-slack"
+
   slack_client_id          = local.slack_client_id
   slack_client_secret      = local.slack_client_secret
   slack_oauth_error_uri    = local.slack_oauth_error_uri
@@ -68,18 +58,21 @@ module secrets {
 }
 
 module slackbot {
-  source          = "amancevice/slackbot/aws"
-  version         = "~> 18.0"
+  source  = "amancevice/slackbot/aws"
+  version = "~> 18.0"
+
   api_description = "Brutalismbot REST API"
-  api_stage_tags  = local.tags
   app_name        = "brutalismbot-slack"
   base_url        = "/slack"
-  kms_key_arn     = data.aws_kms_key.key.arn
-  lambda_tags     = local.tags
-  log_group_tags  = local.tags
-  role_name       = local.role_name
-  role_tags       = local.tags
-  secret_name     = module.secrets.secret.name
+  role_name       = "brutalismbot"
+
+  kms_key_arn = module.secrets.kms_key.arn
+  secret_name = module.secrets.secret.name
+
+  api_stage_tags = local.tags
+  lambda_tags    = local.tags
+  log_group_tags = local.tags
+  role_tags      = local.tags
 }
 
 resource aws_api_gateway_base_path_mapping api {
@@ -91,7 +84,7 @@ resource aws_api_gateway_base_path_mapping api {
 
 resource aws_api_gateway_domain_name api {
   certificate_arn = data.aws_acm_certificate.cert.arn
-  domain_name     = "api.${local.domain}"
+  domain_name     = "api.brutalismbot.com"
   security_policy = "TLS_1_2"
 }
 
@@ -105,10 +98,6 @@ resource aws_route53_record api {
     name                   = aws_api_gateway_domain_name.api.cloudfront_domain_name
     zone_id                = aws_api_gateway_domain_name.api.cloudfront_zone_id
   }
-}
-
-variable RELEASE {
-  description = "Release tag"
 }
 
 variable SLACK_CLIENT_ID {
