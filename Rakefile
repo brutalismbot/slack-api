@@ -1,8 +1,7 @@
 require "rake/clean"
-
-task :default => %i[terraform:plan]
 CLOBBER.include ".terraform"
-CLEAN.include ".terraform/terraform.zip"
+CLEAN.include "terraform.zip"
+task :default => %i[terraform:plan]
 
 namespace :terraform do
   directory ".terraform" do
@@ -10,20 +9,18 @@ namespace :terraform do
   end
 
   desc "Run terraform init"
-  task :init => %w[.terraform]
+  task :init => %i[.terraform]
 
-  ".terraform/terraform.zip".tap do |planfile|
-
-    file planfile => %w[terraform.tf], order_only: %w[.terraform] do
-      sh "terraform plan -out #{planfile}"
-    end
-
-    desc "Run terraform apply"
-    task :apply => [planfile] do
-      sh "terraform apply #{planfile}"
-    end
-
-    desc "Run terraform plan"
-    task :plan => [planfile]
+  file "terraform.zip" => %i[terraform.tf], order_only: %i[.terraform] do
+    sh "terraform plan -out terraform.zip"
   end
+
+  desc "Run terraform apply"
+  task :apply => %i[terraform.zip] do
+    sh "terraform apply terraform.zip"
+    rm "terraform.zip"
+  end
+
+  desc "Run terraform plan"
+  task :plan => %i[terraform.zip]
 end
