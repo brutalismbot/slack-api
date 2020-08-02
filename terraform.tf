@@ -34,7 +34,7 @@ data aws_route53_zone website {
 }
 
 data aws_secretsmanager_secret slackbot {
-  name = "brutalismbot-slack"
+  name = "brutalismbot/slack"
 }
 
 module slackbot {
