@@ -13,7 +13,7 @@ provider aws {
 
 module secrets {
   source  = "amancevice/slackbot-secrets/aws"
-  version = "4.0.0"
+  version = "5.0.0"
 
   kms_key_alias = "alias/brutalismbot"
   secret_name   = "brutalismbot-slack"
