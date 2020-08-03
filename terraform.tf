@@ -19,23 +19,7 @@ locals {
   }
 }
 
-data aws_acm_certificate cert {
-  domain      = "brutalismbot.com"
-  types       = ["AMAZON_ISSUED"]
-  most_recent = true
-}
-
-data aws_kms_alias slackbot {
-  name = "alias/brutalismbot"
-}
-
-data aws_route53_zone website {
-  name = "brutalismbot.com."
-}
-
-data aws_secretsmanager_secret slackbot {
-  name = "brutalismbot/slack"
-}
+# SLACKBOT
 
 module slackbot {
   source  = "amancevice/slackbot/aws"
@@ -53,6 +37,18 @@ module slackbot {
   lambda_tags    = local.tags
   log_group_tags = local.tags
   role_tags      = local.tags
+}
+
+# DOMAIN
+
+data aws_acm_certificate cert {
+  domain      = "brutalismbot.com"
+  types       = ["AMAZON_ISSUED"]
+  most_recent = true
+}
+
+data aws_route53_zone website {
+  name = "brutalismbot.com."
 }
 
 resource aws_api_gateway_base_path_mapping api {
@@ -78,4 +74,14 @@ resource aws_route53_record api {
     name                   = aws_api_gateway_domain_name.api.cloudfront_domain_name
     zone_id                = aws_api_gateway_domain_name.api.cloudfront_zone_id
   }
+}
+
+# SECRETS
+
+data aws_kms_alias slackbot {
+  name = "alias/brutalismbot"
+}
+
+data aws_secretsmanager_secret slackbot {
+  name = "brutalismbot/slack"
 }
