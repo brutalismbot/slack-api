@@ -13,8 +13,7 @@ provider aws {
 
 locals {
   tags = {
-    App  = "slack-api"
-    Name = "brutalismbot"
+    Name = "slack.brutalismbot.com"
     Repo = "https://github.com/brutalismbot/slack-api"
   }
 }
