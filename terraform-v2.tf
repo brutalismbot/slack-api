@@ -62,14 +62,14 @@ resource aws_apigatewayv2_api_mapping domain {
 }
 
 resource aws_route53_record us_east_1 {
-  health_check_id = aws_route53_health_check.healthcheck.id
+  # health_check_id = aws_route53_health_check.healthcheck.id
   name            = aws_apigatewayv2_domain_name.domain.domain_name
   set_identifier  = "us-east-1.${aws_apigatewayv2_domain_name.domain.domain_name}"
   type            = "A"
   zone_id         = data.aws_route53_zone.website.id
 
   alias {
-    evaluate_target_health = true
+    evaluate_target_health = false # true
     name                   = aws_apigatewayv2_domain_name.domain.domain_name_configuration.0.target_domain_name
     zone_id                = aws_apigatewayv2_domain_name.domain.domain_name_configuration.0.hosted_zone_id
   }
@@ -79,6 +79,7 @@ resource aws_route53_record us_east_1 {
   }
 }
 
+/*
 resource aws_route53_health_check healthcheck {
   failure_threshold = "3"
   fqdn              = "slack.brutalismbot.com"
@@ -89,6 +90,7 @@ resource aws_route53_health_check healthcheck {
   tags              = local.tags
   type              = "HTTPS"
 }
+*/
 
 
 # SLACKBOT V2
