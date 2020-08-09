@@ -63,10 +63,10 @@ resource aws_apigatewayv2_api_mapping domain {
 
 resource aws_route53_record us_east_1 {
   # health_check_id = aws_route53_health_check.healthcheck.id
-  name            = aws_apigatewayv2_domain_name.domain.domain_name
-  set_identifier  = "us-east-1.${aws_apigatewayv2_domain_name.domain.domain_name}"
-  type            = "A"
-  zone_id         = data.aws_route53_zone.website.id
+  name           = aws_apigatewayv2_domain_name.domain.domain_name
+  set_identifier = "us-east-1.${aws_apigatewayv2_domain_name.domain.domain_name}"
+  type           = "A"
+  zone_id        = data.aws_route53_zone.website.id
 
   alias {
     evaluate_target_health = false # true
@@ -97,7 +97,7 @@ resource aws_route53_health_check healthcheck {
 
 module slackbot_v2 {
   source  = "amancevice/slackbot/aws"
-  version = "19.3.0"
+  version = "19.4.0"
 
   base_path                   = "/"
   role_name                   = "brutalismbot-slack-lambda"
