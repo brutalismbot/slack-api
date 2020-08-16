@@ -87,13 +87,22 @@ resource aws_route53_health_check healthcheck {
 
 module slackbot {
   source  = "amancevice/slackbot/aws"
-  version = "19.4.0"
+  version = "19.4.1"
 
   base_path                   = "/slack"
-  role_name                   = "brutalismbot-slack-lambda"
-  topic_name                  = "brutalismbot-slack"
   lambda_function_name        = "brutalismbot-slack-http-api"
   log_group_retention_in_days = 30
+  role_name                   = "brutalismbot-slack-lambda"
+  topic_name                  = "brutalismbot-slack"
+
+  lambda_permissions = [
+    "${aws_apigatewayv2_api.http_api.execution_arn}/*/*/health",
+    "${aws_apigatewayv2_api.http_api.execution_arn}/*/*/oauth",
+    "${aws_apigatewayv2_api.http_api.execution_arn}/*/*/oauth/v2",
+    "${aws_apigatewayv2_api.http_api.execution_arn}/*/*/callbacks",
+    "${aws_apigatewayv2_api.http_api.execution_arn}/*/*/events",
+    "${aws_apigatewayv2_api.http_api.execution_arn}/*/*/slash/*",
+  ]
 
   http_api_id            = aws_apigatewayv2_api.http_api.id
   http_api_execution_arn = aws_apigatewayv2_api.http_api.execution_arn
