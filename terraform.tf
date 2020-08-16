@@ -15,7 +15,8 @@ provider aws {
 
 locals {
   tags = {
-    Name = "slack.brutalismbot.com"
+    App  = "brutalismbot"
+    Name = "slack"
     Repo = "https://github.com/brutalismbot/slack-api"
   }
 }
@@ -71,13 +72,25 @@ resource aws_apigatewayv2_api_mapping slack {
   stage           = aws_apigatewayv2_stage.default.id
 }
 
+resource aws_route53_health_check healthcheck {
+  failure_threshold = "3"
+  fqdn              = "api.brutalismbot.com"
+  measure_latency   = true
+  port              = 443
+  request_interval  = "30"
+  resource_path     = "/slack/health"
+  tags              = local.tags
+  type              = "HTTPS"
+}
+
+
 # SLACKBOT V2
 
 module slackbot_v2 {
   source  = "amancevice/slackbot/aws"
   version = "19.4.0"
 
-  base_path                   = "/"
+  base_path                   = "/slack"
   role_name                   = "brutalismbot-slack-lambda"
   topic_name                  = "brutalismbot-slack"
   lambda_function_name        = "brutalismbot-slack-http-api"
