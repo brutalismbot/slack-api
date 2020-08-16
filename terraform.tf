@@ -83,10 +83,9 @@ resource aws_route53_health_check healthcheck {
   type              = "HTTPS"
 }
 
+# SLACKBOT
 
-# SLACKBOT V2
-
-module slackbot_v2 {
+module slackbot {
   source  = "amancevice/slackbot/aws"
   version = "19.4.0"
 
@@ -102,26 +101,6 @@ module slackbot_v2 {
   lambda_kms_key_arn = data.aws_kms_alias.slackbot.target_key_arn
   secret_name        = data.aws_secretsmanager_secret.slackbot.name
 
-  lambda_tags    = local.tags
-  log_group_tags = local.tags
-  role_tags      = local.tags
-}
-
-# SLACKBOT
-
-module slackbot {
-  source  = "amancevice/slackbot/aws"
-  version = "18.2.0"
-
-  api_description = "Brutalismbot REST API"
-  app_name        = "brutalismbot-slack"
-  base_url        = "/slack"
-  role_name       = "brutalismbot"
-
-  kms_key_arn = data.aws_kms_alias.slackbot.target_key_arn
-  secret_name = data.aws_secretsmanager_secret.slackbot.name
-
-  api_stage_tags = local.tags
   lambda_tags    = local.tags
   log_group_tags = local.tags
   role_tags      = local.tags
