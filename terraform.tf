@@ -87,7 +87,7 @@ resource aws_route53_health_check healthcheck {
 
 module slackbot {
   source  = "amancevice/slackbot/aws"
-  version = "19.4.2"
+  version = "19.4.3"
 
   base_path                   = "/slack"
   lambda_function_name        = "brutalismbot-slack-http-api"
