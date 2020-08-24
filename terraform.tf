@@ -72,6 +72,7 @@ resource aws_apigatewayv2_api_mapping slack {
   stage           = aws_apigatewayv2_stage.default.id
 }
 
+/*
 resource aws_route53_health_check healthcheck {
   failure_threshold = "3"
   fqdn              = "api.brutalismbot.com"
@@ -82,12 +83,13 @@ resource aws_route53_health_check healthcheck {
   tags              = local.tags
   type              = "HTTPS"
 }
+*/
 
 # SLACKBOT
 
 module slackbot {
   source  = "amancevice/slackbot/aws"
-  version = "19.4.3"
+  version = "19.5.0"
 
   base_path                   = "/slack"
   lambda_function_name        = "brutalismbot-slack-http-api"
