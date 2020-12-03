@@ -8,6 +8,11 @@ terraform {
   }
 
   required_providers {
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.0"
+    }
+
     aws = {
       source  = "hashicorp/aws"
       version = "~> 3.0"
@@ -95,7 +100,7 @@ resource "aws_route53_health_check" "healthcheck" {
 
 module "slackbot" {
   source  = "amancevice/slackbot/aws"
-  version = "19.5.0"
+  version = "20.0.0"
 
   base_path                   = "/slack"
   lambda_function_name        = "brutalismbot-slack-http-api"
@@ -134,4 +139,10 @@ data "aws_kms_alias" "slackbot" {
 
 data "aws_secretsmanager_secret" "slackbot" {
   name = "brutalismbot/slack"
+}
+
+# OUTPUTS
+
+output "healthcheck" {
+  value = "https://api.brutalismbot.com/slack/health"
 }
