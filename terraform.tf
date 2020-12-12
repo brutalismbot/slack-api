@@ -100,23 +100,24 @@ resource "aws_route53_health_check" "healthcheck" {
 
 module "slackbot" {
   source  = "amancevice/slackbot/aws"
-  version = "20.0.0"
+  version = "20.1.0"
 
   base_path                   = "/slack"
+  kms_key_alias               = "alias/brutalismbot"
   lambda_function_name        = "brutalismbot-slack-http-api"
   log_group_retention_in_days = 30
   role_name                   = "brutalismbot-slack-lambda"
+  secret_name                 = "brutalismbot/slack"
   topic_name                  = "brutalismbot-slack"
 
   http_api_id            = aws_apigatewayv2_api.http_api.id
   http_api_execution_arn = aws_apigatewayv2_api.http_api.execution_arn
 
-  lambda_kms_key_arn = data.aws_kms_alias.slackbot.target_key_arn
-  secret_name        = data.aws_secretsmanager_secret.slackbot.name
-
+  kms_key_tags   = local.tags
   lambda_tags    = local.tags
   log_group_tags = local.tags
   role_tags      = local.tags
+  secret_tags    = local.tags
 }
 
 # DOMAIN
@@ -129,16 +130,6 @@ data "aws_acm_certificate" "cert" {
 
 data "aws_route53_zone" "website" {
   name = "brutalismbot.com."
-}
-
-# SECRETS
-
-data "aws_kms_alias" "slackbot" {
-  name = "alias/brutalismbot"
-}
-
-data "aws_secretsmanager_secret" "slackbot" {
-  name = "brutalismbot/slack"
 }
 
 # OUTPUTS
