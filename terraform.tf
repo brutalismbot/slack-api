@@ -100,7 +100,7 @@ resource "aws_route53_health_check" "healthcheck" {
 
 module "slackbot" {
   source  = "amancevice/slackbot/aws"
-  version = "20.2.0"
+  version = "20.2.1"
 
   base_path                   = "/slack"
   kms_key_alias               = "alias/brutalismbot"
