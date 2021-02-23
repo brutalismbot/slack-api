@@ -15,7 +15,7 @@ terraform {
 
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 3.29"
     }
   }
 }
@@ -100,7 +100,7 @@ resource "aws_route53_health_check" "healthcheck" {
 
 module "slackbot" {
   source  = "amancevice/slackbot/aws"
-  version = "20.3.0"
+  version = "21.0.0"
 
   base_path                   = "/slack"
   kms_key_alias               = "alias/brutalismbot"
