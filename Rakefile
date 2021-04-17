@@ -1,26 +1,26 @@
+require "dotenv/load"
 require "rake/clean"
-CLOBBER.include ".terraform"
-CLEAN.include "terraform.zip"
+CLEAN.include ".terraform"
 task :default => %i[terraform:plan]
 
 namespace :terraform do
+  %i[plan apply].each do |cmd|
+    desc "Run terraform #{ cmd }"
+    task cmd => :init do
+      sh %{terraform #{ cmd }}
+    end
+  end
+
+  namespace :apply do
+    desc "Run terraform auto -auto-approve"
+    task :auto => :init do
+      sh %{terraform apply -auto-approve}
+    end
+  end
+
+  task :init => ".terraform"
+
   directory ".terraform" do
-    sh "terraform init"
+    sh %{terraform init}
   end
-
-  desc "Run terraform init"
-  task :init => %i[.terraform]
-
-  file "terraform.zip" => %i[terraform.tf], order_only: %i[.terraform] do
-    sh "terraform plan -out terraform.zip"
-  end
-
-  desc "Run terraform apply"
-  task :apply => %i[terraform.zip] do
-    sh "terraform apply terraform.zip"
-    rm "terraform.zip"
-  end
-
-  desc "Run terraform plan"
-  task :plan => %i[terraform.zip]
 end
