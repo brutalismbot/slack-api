@@ -4,11 +4,14 @@ CLEAN.include ".terraform"
 task :default => %i[terraform:plan]
 
 namespace :terraform do
-  %i[plan apply].each do |cmd|
-    desc "Run terraform #{ cmd }"
-    task cmd => :init do
-      sh %{terraform #{ cmd }}
-    end
+  desc "Run terraform plan"
+  task :plan => :init do
+    sh %{terraform plan -detailed-exitcode}
+  end
+
+  desc "Run terraform apply"
+  task :apply => :init do
+    sh %{terraform apply}
   end
 
   namespace :apply do
