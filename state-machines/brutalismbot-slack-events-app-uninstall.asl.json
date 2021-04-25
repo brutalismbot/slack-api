@@ -1,0 +1,21 @@
+{
+  "StartAt": "Transform Event",
+  "States": {
+    "Transform Event": {
+      "Type": "Pass",
+      "Next": "Uninstall",
+      "Parameters": {
+        "TableName": "${table_name}",
+        "IndexName": "slack-team",
+        "ProjectionExpression": "GUID,SORT",
+        "KeyConditionExpression": "TEAM_ID = :TEAM_ID",
+        "ExpressionAttributeValues": { ":TEAM_ID.$": "$.team_id" }
+      }
+    },
+    "Uninstall": {
+      "Type": "Task",
+      "Resource": "${uninstall}",
+      "End": true
+    }
+  }
+}

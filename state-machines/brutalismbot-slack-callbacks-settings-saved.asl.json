@@ -1,0 +1,53 @@
+{
+  "StartAt": "Update App",
+  "States": {
+    "Update App": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Next": "Reload Home",
+      "ResultSelector": {
+        "api_app_id.$": "$.Attributes.APP_ID.S",
+        "team_id.$": "$.Attributes.TEAM_ID.S",
+        "event_time.$": "$.Attributes.UPDATED_UTC.N",
+        "event": { "user.$": "$.Attributes.UPDATED_BY.S" }
+      },
+      "Parameters": {
+        "TableName": "Brutalismbot",
+        "UpdateExpression": "SET CONVERSATION_ID = :CONVERSATION_ID, UPDATED_UTC = :UPDATED_UTC, UPDATED_BY = :UPDATED_BY",
+        "ReturnValues": "ALL_NEW",
+        "Key": {
+          "GUID": {
+            "S.$": "States.Format('SLACK/APP/{}/{}', $.api_app_id, $.team.id)"
+          },
+          "SORT": { "S": "SLACK/APP" }
+        },
+        "ExpressionAttributeValues": {
+          ":CONVERSATION_ID": {
+            "S.$": "$.view.state.values.conversation_select.conversation_select.selected_conversation"
+          },
+          ":UPDATED_UTC": {
+            "N.$": "$.view.blocks[3].elements[0].value"
+          },
+          ":UPDATED_BY": {
+            "S.$": "$.user.id"
+          }
+        }
+      }
+    },
+    "Reload Home": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::states:startExecution",
+      "End": true,
+      "Parameters": {
+        "StateMachineArn": "${events_app_home_opened}",
+        "Input": {
+          "AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$": "$$.Execution.Id",
+          "api_app_id.$": "$.api_app_id",
+          "team_id.$": "$.team_id",
+          "event_time.$": "States.StringToJson($.event_time)",
+          "event.$": "$.event"
+        }
+      }
+    }
+  }
+}

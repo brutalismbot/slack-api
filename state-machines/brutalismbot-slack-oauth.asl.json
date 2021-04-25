@@ -1,0 +1,30 @@
+{
+  "StartAt": "Transform Event",
+  "States": {
+    "Transform Event": {
+      "Type": "Pass",
+      "Next": "Put Item",
+      "Parameters": {
+        "TableName": "${table_name}",
+        "Item": {
+          "GUID": {
+            "S.$": "States.Format('SLACK/APP/{}/{}', $.app_id, $.team.id)"
+          },
+          "SORT": { "S": "SLACK/APP" },
+          "JSON": { "S.$": "States.JsonToString($)" },
+          "ACCESS_TOKEN": { "S.$": "$.access_token" },
+          "APP_ID": { "S.$": "$.app_id" },
+          "TEAM_ID": { "S.$": "$.team.id" },
+          "TEAM_NAME": { "S.$": "$.team.name" },
+          "USER_ID": { "S.$": "$.authed_user.id" }
+        }
+      }
+    },
+    "Put Item": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:putItem",
+      "End": true,
+      "Parameters": { "TableName.$": "$.TableName", "Item.$": "$.Item" }
+    }
+  }
+}

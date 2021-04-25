@@ -1,0 +1,227 @@
+{
+  "StartAt": "Get App",
+  "States": {
+    "Get App": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:getItem",
+      "Next": "Get View",
+      "ResultPath": "$.result",
+      "Parameters": {
+        "TableName": "${table_name}",
+        "ProjectionExpression": "ACCESS_TOKEN,CONVERSATION_ID,UPDATED_BY,UPDATED_UTC",
+        "Key": {
+          "GUID": {
+            "S.$": "States.Format('SLACK/APP/{}/{}', $.api_app_id, $.team_id)"
+          },
+          "SORT": {
+            "S": "SLACK/APP"
+          }
+        }
+      }
+    },
+    "Get View": {
+      "Type": "Parallel",
+      "Next": "Has Conversation?",
+      "ResultPath": "$.home.view",
+      "ResultSelector": {
+        "type": "home",
+        "callback_id": "settings",
+        "external_id": "app_home",
+        "title": {
+          "type": "plain_text",
+          "text": "Brutalismbot Home",
+          "emoji": true
+        },
+        "blocks.$": "$"
+      },
+      "Branches": [
+        {
+          "StartAt": "Get Banner",
+          "States": {
+            "Get Banner": {
+              "Type": "Pass",
+              "End": true,
+              "Parameters": {
+                "type": "image",
+                "image_url": "https://brutalismbot.com/banner.png",
+                "alt_text": "brutalist"
+              }
+            }
+          }
+        },
+        {
+          "StartAt": "Get Header",
+          "States": {
+            "Get Header": {
+              "Type": "Pass",
+              "End": true,
+              "Parameters": {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "Settings",
+                  "emoji": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "StartAt": "Get Conversations",
+          "States": {
+            "Get Conversations": {
+              "Type": "Pass",
+              "End": true,
+              "Parameters": {
+                "block_id": "conversation_select",
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "Brutalismbot will post messages to…"
+                },
+                "accessory": {
+                  "type": "conversations_select",
+                  "action_id": "conversation_select",
+                  "placeholder": {
+                    "type": "plain_text",
+                    "text": "Select channel",
+                    "emoji": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "StartAt": "Get Save Button",
+          "States": {
+            "Get Save Button": {
+              "Type": "Pass",
+              "End": true,
+              "Parameters": {
+                "block_id": "save",
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "Save",
+                      "emoji": true
+                    },
+                    "value.$": "States.Format('{}', $.event_time)",
+                    "action_id": "save"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "StartAt": "Get Context",
+          "States": {
+            "Get Context": {
+              "Type": "Pass",
+              "End": true,
+              "Parameters": {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": " "
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Has Conversation?": {
+      "Type": "Choice",
+      "Default": "Has Context?",
+      "Choices": [
+        {
+          "Next": "Add Conversation ID",
+          "Variable": "$.result.Item.CONVERSATION_ID.S",
+          "IsPresent": true
+        }
+      ]
+    },
+    "Add Conversation ID": {
+      "Type": "Pass",
+      "Next": "Has Context?",
+      "InputPath": "$.result.Item.CONVERSATION_ID.S",
+      "ResultPath": "$.home.view.blocks[2].accessory.initial_conversation"
+    },
+    "Has Context?": {
+      "Type": "Choice",
+      "Default": "Encode View",
+      "Choices": [
+        {
+          "Next": "Add Context",
+          "And": [
+            { "Variable": "$.result.Item.UPDATED_BY.S", "IsPresent": true },
+            { "Variable": "$.result.Item.UPDATED_UTC.N", "IsPresent": true }
+          ]
+        }
+      ]
+    },
+    "Add Context": {
+      "Type": "Pass",
+      "Next": "Encode View",
+      "ResultPath": "$.home.view.blocks[4].elements[0]",
+      "Parameters": {
+        "type": "mrkdwn",
+        "text.$": "States.Format('Last Updated <!date^{}^\\{date_short\\} \\{time\\}|some time ago> by <@{}>', $.result.Item.UPDATED_UTC.N, $.result.Item.UPDATED_BY.S)"
+      }
+    },
+    "Encode View": {
+      "Type": "Pass",
+      "Next": "Post Request",
+      "ResultPath": "$.home",
+      "Parameters": {
+        "user_id.$": "$.event.user",
+        "view.$": "States.JsonToString($.home.view)"
+      }
+    },
+    "Post Request": {
+      "Type": "Task",
+      "Resource": "${post_arn}",
+      "Next": "OK?",
+      "Parameters": {
+        "url": "https://slack.com/api/views.publish",
+        "body.$": "States.JsonToString($.home)",
+        "headers": {
+          "authorization.$": "States.Format('Bearer {}', $.result.Item.ACCESS_TOKEN.S)",
+          "content-type": "application/json; charset=utf-8"
+        }
+      }
+    },
+    "OK?": {
+      "Type": "Choice",
+      "Default": "Fail",
+      "Choices": [
+        {
+          "Next": "Succeed",
+          "And": [
+            {
+              "Variable": "$.ok",
+              "IsPresent": true
+            },
+            {
+              "Variable": "$.ok",
+              "BooleanEquals": true
+            }
+          ]
+        }
+      ]
+    },
+    "Fail": {
+      "Type": "Fail"
+    },
+    "Succeed": {
+      "Type": "Succeed"
+    }
+  }
+}

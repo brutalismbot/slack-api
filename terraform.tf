@@ -70,7 +70,7 @@ resource "aws_apigatewayv2_stage" "default" {
 
 resource "aws_cloudwatch_log_group" "http_api_logs" {
   name              = "/aws/apigatewayv2/${aws_apigatewayv2_api.http_api.name}"
-  retention_in_days = 30
+  retention_in_days = 14
   tags              = local.tags
 }
 
