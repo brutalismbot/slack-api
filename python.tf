@@ -4,7 +4,6 @@ resource "aws_apigatewayv2_api" "http_api_v2" {
   description   = "Brutalismbot slack API v2"
   name          = "brutalismbot/slack/v2"
   protocol_type = "HTTP"
-  tags          = local.tags
 }
 
 resource "aws_apigatewayv2_stage" "default_v2" {
@@ -12,7 +11,6 @@ resource "aws_apigatewayv2_stage" "default_v2" {
   auto_deploy = true
   description = "Brutalismbot HTTP API"
   name        = "$default"
-  tags        = local.tags
 
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.http_api_logs.arn
@@ -37,7 +35,6 @@ resource "aws_apigatewayv2_stage" "default_v2" {
 resource "aws_cloudwatch_log_group" "http_api_logs_v2" {
   name              = "/aws/apigatewayv2/${aws_apigatewayv2_api.http_api_v2.name}"
   retention_in_days = 14
-  tags              = local.tags
 }
 
 data "aws_caller_identity" "current" {}
@@ -68,12 +65,6 @@ module "slackbot_v2" {
   event_bus_arn          = data.aws_arn.event_bus.arn
   http_api_id            = aws_apigatewayv2_api.http_api_v2.id
   http_api_execution_arn = aws_apigatewayv2_api.http_api_v2.execution_arn
-
-  kms_key_tags   = local.tags
-  lambda_tags    = local.tags
-  log_group_tags = local.tags
-  role_tags      = local.tags
-  secret_tags    = local.tags
 }
 
 module "slash_brutalismbot" {
@@ -86,9 +77,7 @@ module "slash_brutalismbot" {
   lambda_function_name        = "brutalismbot-v2-slack-slash-brutalismbot"
   lambda_kms_key_arn          = module.slackbot_v2.kms_key.arn
   lambda_role_arn             = module.slackbot_v2.role.arn
-  lambda_tags                 = local.tags
   log_group_retention_in_days = 14
-  log_group_tags              = local.tags
   slack_response_type         = "modal"
   slack_slash_command         = "brutalism"
 
@@ -222,7 +211,6 @@ resource "aws_lambda_permission" "forward" {
 resource "aws_cloudwatch_log_group" "forward" {
   name              = "/aws/lambda/${aws_lambda_function.forward.function_name}"
   retention_in_days = 14
-  tags              = local.tags
 }
 
 resource "aws_lambda_function" "forward" {
@@ -233,7 +221,6 @@ resource "aws_lambda_function" "forward" {
   role             = data.aws_iam_role.lambda.arn
   runtime          = "ruby2.7"
   source_code_hash = data.archive_file.package.output_base64sha256
-  tags             = local.tags
   timeout          = 10
 
   environment {
@@ -250,7 +237,6 @@ resource "aws_cloudwatch_event_rule" "oauth" {
   event_bus_name = "brutalismbot"
   name           = "slack-oauth"
   role_arn       = data.aws_iam_role.events.arn
-  tags           = local.tags
 
   event_pattern = jsonencode({
     source      = ["slack"]
@@ -269,7 +255,6 @@ resource "aws_cloudwatch_event_target" "oauth" {
 resource "aws_sfn_state_machine" "oauth" {
   name     = "brutalismbot-slack-oauth"
   role_arn = data.aws_iam_role.states.arn
-  tags     = local.tags
 
   definition = templatefile("${path.module}/state-machines/brutalismbot-slack-oauth.asl.json", {
     table_name = "Brutalismbot"
@@ -283,7 +268,6 @@ resource "aws_cloudwatch_event_rule" "events_app_uninstalled" {
   event_bus_name = "brutalismbot"
   name           = "slack-events-app-uninstall"
   role_arn       = data.aws_iam_role.events.arn
-  tags           = local.tags
 
   event_pattern = jsonencode({
     source      = ["slack"]
@@ -307,7 +291,6 @@ resource "aws_cloudwatch_event_target" "events_app_uninstalled" {
 resource "aws_sfn_state_machine" "events_app_uninstalled" {
   name     = "brutalismbot-slack-events-app-uninstall"
   role_arn = data.aws_iam_role.states.arn
-  tags     = local.tags
 
   definition = templatefile("${path.module}/state-machines/brutalismbot-slack-events-app-uninstall.asl.json", {
     table_name = "Brutalismbot"
@@ -318,7 +301,6 @@ resource "aws_sfn_state_machine" "events_app_uninstalled" {
 resource "aws_cloudwatch_log_group" "events_app_uninstalled" {
   name              = "/aws/lambda/${aws_lambda_function.events_app_uninstalled.function_name}"
   retention_in_days = 14
-  tags              = local.tags
 }
 
 resource "aws_lambda_function" "events_app_uninstalled" {
@@ -329,7 +311,6 @@ resource "aws_lambda_function" "events_app_uninstalled" {
   role             = data.aws_iam_role.lambda.arn
   runtime          = "ruby2.7"
   source_code_hash = data.archive_file.package.output_base64sha256
-  tags             = local.tags
   timeout          = 10
 
   environment {
@@ -346,7 +327,6 @@ resource "aws_cloudwatch_event_rule" "events_app_home_opened" {
   event_bus_name = "brutalismbot"
   name           = "slack-events-app-home-opened"
   role_arn       = data.aws_iam_role.events.arn
-  tags           = local.tags
 
   event_pattern = jsonencode({
     source      = ["slack"]
@@ -366,7 +346,6 @@ resource "aws_cloudwatch_event_target" "events_app_home_opened" {
 resource "aws_sfn_state_machine" "events_app_home_opened" {
   name     = "brutalismbot-slack-events-app-home-opened"
   role_arn = data.aws_iam_role.states.arn
-  tags     = local.tags
 
   definition = templatefile("${path.module}/state-machines/brutalismbot-slack-events-app-home-opened.asl.json", {
     table_name = "Brutalismbot"
@@ -379,7 +358,6 @@ resource "aws_sfn_state_machine" "events_app_home_opened" {
 resource "aws_cloudwatch_log_group" "post" {
   name              = "/aws/lambda/${aws_lambda_function.post.function_name}"
   retention_in_days = 14
-  tags              = local.tags
 }
 
 resource "aws_lambda_function" "post" {
@@ -390,7 +368,6 @@ resource "aws_lambda_function" "post" {
   role             = data.aws_iam_role.lambda.arn
   runtime          = "ruby2.7"
   source_code_hash = data.archive_file.package.output_base64sha256
-  tags             = local.tags
   timeout          = 10
 }
 
@@ -401,7 +378,6 @@ resource "aws_cloudwatch_event_rule" "callbacks_settings_saved" {
   event_bus_name = "brutalismbot"
   name           = "slack-callbacks-settings-saved"
   role_arn       = data.aws_iam_role.events.arn
-  tags           = local.tags
 
   event_pattern = jsonencode({
     source      = ["slack"]
@@ -421,7 +397,6 @@ resource "aws_cloudwatch_event_target" "callbacks_settings_saved" {
 resource "aws_sfn_state_machine" "callbacks_settings_saved" {
   name     = "brutalismbot-slack-callbacks-settings-saved"
   role_arn = data.aws_iam_role.states.arn
-  tags     = local.tags
 
   definition = templatefile("${path.module}/state-machines/brutalismbot-slack-callbacks-settings-saved.asl.json", {
     table_name             = "Brutalismbot"
