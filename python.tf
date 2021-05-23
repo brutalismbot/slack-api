@@ -256,7 +256,7 @@ resource "aws_sfn_state_machine" "oauth" {
   name     = "brutalismbot-slack-oauth"
   role_arn = data.aws_iam_role.states.arn
 
-  definition = templatefile("${path.module}/state-machines/brutalismbot-slack-oauth.asl.json", {
+  definition = templatefile("${path.module}/state-machines/oauth.asl.json", {
     table_name = "Brutalismbot"
   })
 }
@@ -292,7 +292,7 @@ resource "aws_sfn_state_machine" "events_app_uninstalled" {
   name     = "brutalismbot-slack-events-app-uninstall"
   role_arn = data.aws_iam_role.states.arn
 
-  definition = templatefile("${path.module}/state-machines/brutalismbot-slack-events-app-uninstall.asl.json", {
+  definition = templatefile("${path.module}/state-machines/events-app-uninstall.asl.json", {
     table_name = "Brutalismbot"
     uninstall  = aws_lambda_function.events_app_uninstalled.arn
   })
@@ -347,7 +347,7 @@ resource "aws_sfn_state_machine" "events_app_home_opened" {
   name     = "brutalismbot-slack-events-app-home-opened"
   role_arn = data.aws_iam_role.states.arn
 
-  definition = templatefile("${path.module}/state-machines/brutalismbot-slack-events-app-home-opened.asl.json", {
+  definition = templatefile("${path.module}/state-machines/events-app-home-opened.asl.json", {
     table_name = "Brutalismbot"
     post_arn   = aws_lambda_function.post.arn
   })
@@ -398,7 +398,7 @@ resource "aws_sfn_state_machine" "callbacks_settings_saved" {
   name     = "brutalismbot-slack-callbacks-settings-saved"
   role_arn = data.aws_iam_role.states.arn
 
-  definition = templatefile("${path.module}/state-machines/brutalismbot-slack-callbacks-settings-saved.asl.json", {
+  definition = templatefile("${path.module}/state-machines/callbacks-settings-saved.asl.json", {
     table_name             = "Brutalismbot"
     events_app_home_opened = aws_sfn_state_machine.events_app_home_opened.arn
   })
