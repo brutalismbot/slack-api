@@ -53,7 +53,7 @@ resource "aws_apigatewayv2_api_mapping" "slack_v2" {
 
 module "slackbot_v2" {
   source  = "amancevice/slackbot/aws"
-  version = "~> 22.0"
+  version = "~> 22.1"
 
   kms_key_alias               = "alias/brutalismbot/v2"
   lambda_post_function_name   = "brutalismbot-v2-slack-api-post"
@@ -322,6 +322,10 @@ resource "aws_lambda_function" "events_app_uninstalled" {
 
 # EVENTS :: APP HOME OPENED
 
+data "aws_lambda_function" "post" {
+  function_name = "brutalismbot-v2-slack-api-post"
+}
+
 resource "aws_cloudwatch_event_rule" "events_app_home_opened" {
   description    = "Slack app home opened"
   event_bus_name = "brutalismbot"
@@ -349,26 +353,8 @@ resource "aws_sfn_state_machine" "events_app_home_opened" {
 
   definition = templatefile("${path.module}/state-machines/events-app-home-opened.asl.json", {
     table_name = "Brutalismbot"
-    post_arn   = aws_lambda_function.post.arn
+    post_arn   = data.aws_lambda_function.post.arn
   })
-}
-
-# NET::HTTP POST
-
-resource "aws_cloudwatch_log_group" "post" {
-  name              = "/aws/lambda/${aws_lambda_function.post.function_name}"
-  retention_in_days = 14
-}
-
-resource "aws_lambda_function" "post" {
-  description      = "Slack REST API POST-er"
-  filename         = data.archive_file.package.output_path
-  function_name    = "brutalismbot-v2-slack-post"
-  handler          = "index.post"
-  role             = data.aws_iam_role.lambda.arn
-  runtime          = "ruby2.7"
-  source_code_hash = data.archive_file.package.output_base64sha256
-  timeout          = 10
 }
 
 # CALLBACKS :: SETTINGS_SAVED

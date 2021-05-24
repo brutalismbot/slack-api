@@ -7,10 +7,8 @@
       "Parameters": {
         "TableName": "${table_name}",
         "Item": {
-          "GUID": {
-            "S.$": "States.Format('SLACK/APP/{}/{}', $.app_id, $.team.id)"
-          },
-          "SORT": { "S": "SLACK/APP" },
+          "GUID": { "S.$": "States.Format('{}/{}', $.app_id, $.team.id)" },
+          "SORT": { "S": "SLACK/AUTH" },
           "JSON": { "S.$": "States.JsonToString($)" },
           "ACCESS_TOKEN": { "S.$": "$.access_token" },
           "APP_ID": { "S.$": "$.app_id" },

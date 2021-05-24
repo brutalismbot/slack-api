@@ -34,19 +34,6 @@ EVENT_BUS_NAME = ENV["EVENT_BUS_NAME"]
 EVENTS   = Aws::EventBridge::Client.new
 DYNAMODB = Aws::DynamoDB::Client.new
 
-handler :post do |event|
-  headers, body, url = event.slice("headers", "body", "url").values
-  uri = URI(url)
-  res = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
-    req = Net::HTTP::Post.new(uri, **headers)
-    req.body = body
-    http.request req
-  end
-  JSON.parse(res.body)
-rescue
-  res.body
-end
-
 handler :forward do |event|
   each_sns_message event do |message, attrs|
     params = {

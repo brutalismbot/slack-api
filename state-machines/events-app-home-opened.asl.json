@@ -1,227 +1,126 @@
 {
-  "StartAt": "Get App",
+  "StartAt": "Get Request",
   "States": {
-    "Get App": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::dynamodb:getItem",
-      "Next": "Get View",
-      "ResultPath": "$.result",
-      "Parameters": {
-        "TableName": "${table_name}",
-        "ProjectionExpression": "ACCESS_TOKEN,CONVERSATION_ID,UPDATED_BY,UPDATED_UTC",
-        "Key": {
-          "GUID": {
-            "S.$": "States.Format('SLACK/APP/{}/{}', $.api_app_id, $.team_id)"
-          },
-          "SORT": {
-            "S": "SLACK/APP"
-          }
-        }
-      }
-    },
-    "Get View": {
+    "Get Request": {
       "Type": "Parallel",
-      "Next": "Has Conversation?",
-      "ResultPath": "$.home.view",
+      "Next": "Send Request",
       "ResultSelector": {
-        "type": "home",
-        "callback_id": "settings",
-        "external_id": "app_home",
-        "title": {
-          "type": "plain_text",
-          "text": "Brutalismbot Home",
-          "emoji": true
-        },
-        "blocks.$": "$"
+        "path": "api/views.publish",
+        "headers.$": "$[0]",
+        "body": {
+          "user_id.$": "$[1].user_id",
+          "view.$": "States.JsonToString($[1].view)"
+        }
       },
       "Branches": [
         {
-          "StartAt": "Get Banner",
+          "StartAt": "Get Headers",
           "States": {
-            "Get Banner": {
-              "Type": "Pass",
+            "Get Headers": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::dynamodb:getItem",
               "End": true,
+              "ResultSelector": {
+                "content-type": "application/json; charset=utf-8",
+                "authorization.$": "States.Format('Bearer {}', $.Item.ACCESS_TOKEN.S)"
+              },
               "Parameters": {
-                "type": "image",
-                "image_url": "https://brutalismbot.com/banner.png",
-                "alt_text": "brutalist"
-              }
-            }
-          }
-        },
-        {
-          "StartAt": "Get Header",
-          "States": {
-            "Get Header": {
-              "Type": "Pass",
-              "End": true,
-              "Parameters": {
-                "type": "header",
-                "text": {
-                  "type": "plain_text",
-                  "text": "Settings",
-                  "emoji": true
+                "TableName": "${table_name}",
+                "ProjectionExpression": "ACCESS_TOKEN",
+                "Key": {
+                  "GUID": { "S.$": "States.Format('{}/{}', $.api_app_id, $.team_id)" },
+                  "SORT": { "S": "SLACK/AUTH" }
                 }
               }
             }
           }
         },
         {
-          "StartAt": "Get Conversations",
+          "StartAt": "Get Body",
           "States": {
-            "Get Conversations": {
+            "Get Body": {
               "Type": "Pass",
               "End": true,
               "Parameters": {
-                "block_id": "conversation_select",
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "Brutalismbot will post messages to…"
-                },
-                "accessory": {
-                  "type": "conversations_select",
-                  "action_id": "conversation_select",
-                  "placeholder": {
+                "user_id.$": "$.event.user",
+                "view": {
+                  "type": "home",
+                  "callback_id": "settings",
+                  "title": {
                     "type": "plain_text",
-                    "text": "Select channel",
+                    "text": "Brutalismbot Home",
                     "emoji": true
-                  }
+                  },
+                  "blocks": [
+                    {
+                      "type": "image",
+                      "image_url": "https://brutalismbot.com/banner.png",
+                      "alt_text": "brutalist"
+                    },
+                    {
+                      "type": "header",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "Settings",
+                        "emoji": true
+                      }
+                    },
+                    {
+                      "block_id": "conversation_select",
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "Brutalismbot will post messages to…"
+                      },
+                      "accessory": {
+                        "type": "conversations_select",
+                        "action_id": "conversation_select",
+                        "placeholder": {
+                          "type": "plain_text",
+                          "text": "Select channel",
+                          "emoji": true
+                        }
+                      }
+                    },
+                    {
+                      "block_id": "save",
+                      "type": "actions",
+                      "elements": [
+                        {
+                          "type": "button",
+                          "text": {
+                            "type": "plain_text",
+                            "text": "Save",
+                            "emoji": true
+                          },
+                          "value.$": "States.Format('{}', $.event_time)",
+                          "action_id": "save"
+                        }
+                      ]
+                    }
+                  ]
                 }
               }
             }
           }
-        },
-        {
-          "StartAt": "Get Save Button",
-          "States": {
-            "Get Save Button": {
-              "Type": "Pass",
-              "End": true,
-              "Parameters": {
-                "block_id": "save",
-                "type": "actions",
-                "elements": [
-                  {
-                    "type": "button",
-                    "text": {
-                      "type": "plain_text",
-                      "text": "Save",
-                      "emoji": true
-                    },
-                    "value.$": "States.Format('{}', $.event_time)",
-                    "action_id": "save"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        {
-          "StartAt": "Get Context",
-          "States": {
-            "Get Context": {
-              "Type": "Pass",
-              "End": true,
-              "Parameters": {
-                "type": "context",
-                "elements": [
-                  {
-                    "type": "mrkdwn",
-                    "text": " "
-                  }
-                ]
-              }
-            }
-          }
         }
       ]
     },
-    "Has Conversation?": {
-      "Type": "Choice",
-      "Default": "Has Context?",
-      "Choices": [
-        {
-          "Next": "Add Conversation ID",
-          "Variable": "$.result.Item.CONVERSATION_ID.S",
-          "IsPresent": true
-        }
-      ]
-    },
-    "Add Conversation ID": {
-      "Type": "Pass",
-      "Next": "Has Context?",
-      "InputPath": "$.result.Item.CONVERSATION_ID.S",
-      "ResultPath": "$.home.view.blocks[2].accessory.initial_conversation"
-    },
-    "Has Context?": {
-      "Type": "Choice",
-      "Default": "Encode View",
-      "Choices": [
-        {
-          "Next": "Add Context",
-          "And": [
-            { "Variable": "$.result.Item.UPDATED_BY.S", "IsPresent": true },
-            { "Variable": "$.result.Item.UPDATED_UTC.N", "IsPresent": true }
-          ]
-        }
-      ]
-    },
-    "Add Context": {
-      "Type": "Pass",
-      "Next": "Encode View",
-      "ResultPath": "$.home.view.blocks[4].elements[0]",
-      "Parameters": {
-        "type": "mrkdwn",
-        "text.$": "States.Format('Last Updated <!date^{}^\\{date_short\\} \\{time\\}|some time ago> by <@{}>', $.result.Item.UPDATED_UTC.N, $.result.Item.UPDATED_BY.S)"
-      }
-    },
-    "Encode View": {
-      "Type": "Pass",
-      "Next": "Post Request",
-      "ResultPath": "$.home",
-      "Parameters": {
-        "user_id.$": "$.event.user",
-        "view.$": "States.JsonToString($.home.view)"
-      }
-    },
-    "Post Request": {
+    "Send Request": {
       "Type": "Task",
-      "Resource": "${post_arn}",
-      "Next": "OK?",
+      "Resource": "arn:aws:states:::events:putEvents",
+      "End": true,
       "Parameters": {
-        "url": "https://slack.com/api/views.publish",
-        "body.$": "States.JsonToString($.home)",
-        "headers": {
-          "authorization.$": "States.Format('Bearer {}', $.result.Item.ACCESS_TOKEN.S)",
-          "content-type": "application/json; charset=utf-8"
-        }
+        "Entries": [{
+          "Detail": {
+            "headers.$": "$.headers",
+            "body.$": "States.JsonToString($.body)"
+          },
+          "DetailType.$": "$.path",
+          "EventBusName": "brutalismbot",
+          "Source": "slack"
+        }]
       }
-    },
-    "OK?": {
-      "Type": "Choice",
-      "Default": "Fail",
-      "Choices": [
-        {
-          "Next": "Succeed",
-          "And": [
-            {
-              "Variable": "$.ok",
-              "IsPresent": true
-            },
-            {
-              "Variable": "$.ok",
-              "BooleanEquals": true
-            }
-          ]
-        }
-      ]
-    },
-    "Fail": {
-      "Type": "Fail"
-    },
-    "Succeed": {
-      "Type": "Succeed"
     }
   }
 }
