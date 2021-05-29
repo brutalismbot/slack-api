@@ -53,7 +53,7 @@ resource "aws_apigatewayv2_api_mapping" "slack_v2" {
 
 module "slackbot_v2" {
   source  = "amancevice/slackbot/aws"
-  version = "~> 22.1"
+  version = "~> 22.2"
 
   kms_key_alias               = "alias/brutalismbot/v2"
   lambda_post_function_name   = "brutalismbot-v2-slack-api-post"
