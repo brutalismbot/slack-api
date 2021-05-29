@@ -118,17 +118,20 @@
     },
     "Send Request": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::events:putEvents",
+      "Resource": "arn:aws:states:::events:putEvents.waitForTaskToken",
+      "TimeoutSeconds": 5,
       "End": true,
       "Parameters": {
         "Entries": [
           {
             "EventBusName": "brutalismbot",
             "Source": "slack",
-            "DetailType": "api/views.publish",
+            "DetailType": "post",
             "Detail": {
+              "body.$": "States.JsonToString($.body)",
               "headers.$": "$.headers",
-              "body.$": "States.JsonToString($.body)"
+              "task-token.$": "$$.Task.Token",
+              "url": "https://slack.com/api/views.publish"
             }
           }
         ]
