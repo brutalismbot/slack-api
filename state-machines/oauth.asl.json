@@ -12,6 +12,8 @@
           "JSON": { "S.$": "States.JsonToString($)" },
           "ACCESS_TOKEN": { "S.$": "$.access_token" },
           "APP_ID": { "S.$": "$.app_id" },
+          "CHANNEL_ID": { "S.$": "$.incoming_webhook.channel_id" },
+          "CHANNEL_NAME": { "S.$": "$.incoming_webhook.channel" },
           "TEAM_ID": { "S.$": "$.team.id" },
           "TEAM_NAME": { "S.$": "$.team.name" },
           "USER_ID": { "S.$": "$.authed_user.id" }

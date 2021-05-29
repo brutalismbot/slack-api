@@ -13,7 +13,7 @@ resource "aws_apigatewayv2_stage" "default_v2" {
   name        = "$default"
 
   access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.http_api_logs.arn
+    destination_arn = aws_cloudwatch_log_group.http_api_logs_v2.arn
 
     format = jsonencode({
       httpMethod     = "$context.httpMethod"

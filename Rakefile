@@ -3,6 +3,11 @@ require "rake/clean"
 CLEAN.include ".terraform"
 task :default => %i[terraform:plan]
 
+desc "Install app"
+task :install do
+  sh %{open https://api.brutalismbot.com/slack/v2/install}
+end
+
 namespace :terraform do
   desc "Run terraform plan"
   task :plan => :init do
