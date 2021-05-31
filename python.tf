@@ -322,10 +322,6 @@ resource "aws_lambda_function" "events_app_uninstalled" {
 
 # EVENTS :: APP HOME OPENED
 
-data "aws_lambda_function" "post" {
-  function_name = "brutalismbot-v2-slack-api-post"
-}
-
 resource "aws_cloudwatch_event_rule" "events_app_home_opened" {
   description    = "Slack app home opened"
   event_bus_name = "brutalismbot"
@@ -353,7 +349,7 @@ resource "aws_sfn_state_machine" "events_app_home_opened" {
 
   definition = templatefile("${path.module}/state-machines/events-app-home-opened.asl.json", {
     table_name = "Brutalismbot"
-    post_arn   = data.aws_lambda_function.post.arn
+    post_arn   = module.slackbot_v2.lambda_post.arn
   })
 }
 
