@@ -1,5 +1,5 @@
 terraform {
-  required_version = "~> 0.14"
+  required_version = "~> 1.0"
 
   backend "s3" {
     bucket = "brutalismbot"
@@ -15,7 +15,7 @@ terraform {
 
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.29"
+      version = "~> 3.38"
     }
   }
 }
@@ -96,32 +96,27 @@ resource "aws_route53_health_check" "healthcheck" {
 
 # SLACKBOT
 
+data "aws_caller_identity" "current" {}
+data "aws_partition" "current" {}
+data "aws_region" "current" {}
+data "aws_arn" "event_bus" {
+  arn = "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:event-bus/brutalismbot"
+}
+
 module "slackbot" {
   source  = "amancevice/slackbot/aws"
-  version = "21.1.0"
+  version = "~> 23.0"
 
-  base_path                   = "/slack"
   kms_key_alias               = "alias/brutalismbot"
-  lambda_function_name        = "brutalismbot-slack-http-api"
-  log_group_retention_in_days = 30
-  role_name                   = "brutalismbot-slack-lambda"
+  lambda_post_function_name   = "brutalismbot-slack-api-post"
+  lambda_proxy_function_name  = "brutalismbot-slack-api-proxy"
+  log_group_retention_in_days = 14
+  role_name                   = "brutalismbot-lambda-slack"
   secret_name                 = "brutalismbot/slack"
-  topic_name                  = "brutalismbot-slack"
 
+  event_bus_arn          = data.aws_arn.event_bus.arn
   http_api_id            = aws_apigatewayv2_api.http_api.id
   http_api_execution_arn = aws_apigatewayv2_api.http_api.execution_arn
-}
-
-# DOMAIN
-
-data "aws_acm_certificate" "cert" {
-  domain      = "brutalismbot.com"
-  types       = ["AMAZON_ISSUED"]
-  most_recent = true
-}
-
-data "aws_route53_zone" "website" {
-  name = "brutalismbot.com."
 }
 
 # OUTPUTS

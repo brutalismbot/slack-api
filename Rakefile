@@ -14,6 +14,11 @@ namespace :terraform do
     sh %{terraform plan -detailed-exitcode}
   end
 
+  desc "Run terraform refresh"
+  task :refresh => :init do
+    sh %{terraform refresh}
+  end
+
   desc "Run terraform apply"
   task :apply => :init do
     sh %{terraform apply}
