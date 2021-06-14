@@ -5,7 +5,7 @@ task :default => %i[terraform:plan]
 
 desc "Install app"
 task :install do
-  sh %{open https://api.brutalismbot.com/slack/v2/install}
+  sh %{open https://api.brutalismbot.com/slack/install}
 end
 
 namespace :terraform do
