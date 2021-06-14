@@ -91,7 +91,7 @@
                 },
                 "accessory": {
                   "type": "conversations_select",
-                  "action_id": "conversation_select",
+                  "action_id": "brutalismbot_conversation",
                   "initial_conversation.$": "$.channel",
                   "placeholder": {
                     "type": "plain_text",

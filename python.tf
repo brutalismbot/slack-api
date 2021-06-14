@@ -67,6 +67,7 @@ module "slackbot_v2" {
   http_api_execution_arn = aws_apigatewayv2_api.http_api_v2.execution_arn
 }
 
+/*
 module "slash_brutalismbot" {
   source  = "amancevice/slackbot-slash-command/aws"
   version = "~> 19.0"
@@ -168,6 +169,7 @@ module "slash_brutalismbot" {
     }
   })
 }
+*/
 
 # DATA
 
@@ -229,6 +231,8 @@ resource "aws_lambda_function" "forward" {
     }
   }
 }
+
+/*
 
 # OAUTH
 
@@ -385,3 +389,5 @@ resource "aws_sfn_state_machine" "callbacks_settings_saved" {
     events_app_home_opened = aws_sfn_state_machine.events_app_home_opened.arn
   })
 }
+
+*/

@@ -1,13 +1,38 @@
 require "json"
+require "logger"
 require "net/http"
 
 require "aws-sdk-eventbridge"
 require "aws-sdk-dynamodb"
 
-require_relative "dsl"
-require_relative "logger"
+class LambdaFormatter < Logger::Formatter
+  Format = "%s %s %s\n"
 
-EVENT_BUS_NAME = ENV["EVENT_BUS_NAME"]
+  def call(severity, time, progname, msg)
+    Format % [ severity, progname.nil? ? "-" : "RequestId: #{ progname }", msg2str(msg).strip ]
+  end
+end
+
+$logger = Logger.new STDOUT, formatter: LambdaFormatter.new
+
+def handler(name, &block)
+  define_method(name) do |event:nil, context:nil|
+    original_progname = $logger.progname
+    $logger.progname = context&.aws_request_id
+    $logger.info("EVENT #{ event.to_json }")
+    yield(event, context).tap { |res| $logger.info("RETURN #{ res.to_json }") }
+  ensure
+    $logger.progname = original_progname
+  end
+end
+
+def each_sns_message(event, &block)
+  event["Records"].each do |record|
+    record["Sns"].then do |sns|
+      yield sns["Message"], sns["MessageAttributes"]
+    end
+  end
+end
 
 EVENTS   = Aws::EventBridge::Client.new
 DYNAMODB = Aws::DynamoDB::Client.new
@@ -15,29 +40,12 @@ DYNAMODB = Aws::DynamoDB::Client.new
 handler :forward do |event|
   each_sns_message event do |message, attrs|
     params = { entries: [ {
-      event_bus_name: EVENT_BUS_NAME,
+      event_bus_name: ENV["EVENT_BUS_NAME"],
       source:         "slack",
       detail_type:    attrs.dig("type", "Value"),
       detail:         message
     } ] }
-    logger.info("PUT EVENTS #{ params.to_json }")
+    $logger.info("PUT EVENTS #{ params.to_json }")
     EVENTS.put_events(**params)
-  end
-end
-
-handler :events_app_uninstalled do |event|
-  params = event.transform_keys(&:snake_case)
-  params[:projection_expression] = "GUID,SORT"
-  logger.info("QUERY #{ params.to_json }")
-  DYNAMODB.query(**params).items.map do |key|
-    logger.info("- #{ key.to_json }")
-    { delete: { key: key, **params.slice(:table_name) } }
-  end.tap do |keys|
-    pages = keys.each_slice(25)
-    pages.each_with_index do |page, i|
-      params = { transact_items: page }
-      logger.info("TRANSACT DELETE [#{ i + 1 }/#{ pages.count }]")
-      DYNAMODB.transact_write_items(**params)
-    end
   end
 end
